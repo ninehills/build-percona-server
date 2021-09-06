@@ -32,6 +32,8 @@ jobs:
         # You may pin to the exact commit or the version.
         # uses: uraimo/run-on-arch-action@07a46afceb4aea01aaa545fedfff61ad9e4c7df0
         uses: uraimo/run-on-arch-action@v2.1.1
+        continue-on-error: true
+        id: build-arm64
         with:
           # CPU architecture: armv6, armv7, aarch64, s390x, ppc64le.
           arch: aarch64
@@ -67,7 +69,11 @@ jobs:
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --install_deps=1
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --rpm_release=${RPM_RELEASE} --deb_release=${DEB_RELEASE} --build_deb=1
             cp -r deb /artifacts/
-            
+  
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1    
+        if: ${{ steps.build-arm64.conclusion == 'failure' }}
+      
       - name: Show the artifact
         # Items placed in /artifacts in the container will be in
         # ${PWD}/artifacts on the host.
