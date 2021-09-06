@@ -58,21 +58,18 @@ jobs:
           # Shell commands to execute in the container.
           run: |
             set -o xtrace
-            set -eu
             echo "Starting build perconna-server"
             rm -rf test || true
             mkdir test
             cp -r /artifacts/source_deb test/
             wget https://raw.githubusercontent.com/percona/percona-server/${BRANCH}/build-ps/percona-server-5.7_builder.sh -O percona-server_builder.sh
             sed -i 's:sudo::g' percona-server_builder.sh
+            sed -i 's/percona-release enable tools testing/#percona-release enable tools testing/g' percona-server_builder.sh
             export build_dir=$(pwd -P)
             cd ${build_dir}
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --install_deps=1
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --rpm_release=${RPM_RELEASE} --deb_release=${DEB_RELEASE} --build_deb=1
             cp -r deb /artifacts/
-  
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
       
       - name: Show the artifact
         # Items placed in /artifacts in the container will be in
@@ -83,6 +80,6 @@ jobs:
       - name: release
         uses: ncipollo/release-action@v1
         with:
-          name: "Percona-Server-5.7.34-37"
+          tag: "Percona-Server-${{ env.VERSION }}"
           artifacts: "artifacts/deb/*"
           token: ${{ secrets.GITHUB_TOKEN }}
