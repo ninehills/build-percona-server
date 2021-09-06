@@ -29,6 +29,7 @@ jobs:
           githubToken: ${{ github.token }}
           env: |
             BRANCH: "Percona-Server-5.7.34-37"
+            VERSION: "5.7.34-37"
             GIT_REPO: "https://github.com/percona/percona-server.git"
             RPM_RELEASE: "1"
             DEB_RELEASE: "1"
@@ -50,10 +51,10 @@ jobs:
             export build_dir=$(pwd -P)
             mkdir -p source_deb
             cd source_deb
-            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.34-37/source/debian/percona-server-5.7_5.7.34-37-1.debian.tar.gz
-            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.34-37/source/debian/percona-server-5.7_5.7.34-37-1.dsc
-            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.34-37/source/debian/percona-server-5.7_5.7.34-37-1_source.changes
-            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.34-37/source/debian/percona-server-5.7_5.7.34-37.orig.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${VERSION}/source/debian/percona-server-5.7_${VERSION}-1.debian.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${VERSION}/source/debian/percona-server-5.7_${VERSION}-1.dsc
+            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${VERSION}/source/debian/percona-server-5.7_${VERSION}-1_source.changes
+            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${VERSION}/source/debian/percona-server-5.7_${VERSION}.orig.tar.gz
             cd ${build_dir}
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --install_deps=1
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --rpm_release=${RPM_RELEASE} --deb_release=${DEB_RELEASE} --build_deb=1
@@ -64,3 +65,10 @@ jobs:
         # ${PWD}/artifacts on the host.
         run: |
           ls -al "${PWD}/artifacts"
+      
+      - name: release
+        uses: ncipollo/release-action@v1
+        with:
+          name: "Percona-Server-5.7.34-37"
+          artifacts: "artifacts/deb/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
