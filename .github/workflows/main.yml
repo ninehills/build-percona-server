@@ -18,8 +18,6 @@ jobs:
       VERSION: "5.7.34-37"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
       - name: Download deb source
         run: |
           apt-get update && apt-get install -y wget
@@ -52,11 +50,10 @@ jobs:
           # Mount the artifacts directory as /artifacts in the container
           dockerRunArgs: |
             --volume "${PWD}/artifacts:/artifacts"
-          # Shell commands to execute in the container.
-          run: |
-            echo "Starting build perconna-server"
+          install: |
             set -o xtrace
-            apt-get update && apt-get install -y wget
+            set -eu
+            apt-get update && apt-get install -y wget dpkg-dev devscripts
             rm -rf test || true
             mkdir test
             cp -r /artifacts/source_deb test/
@@ -65,6 +62,13 @@ jobs:
             export build_dir=$(pwd -P)
             cd ${build_dir}
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --install_deps=1
+          # Shell commands to execute in the container.
+          run: |
+            set -o xtrace
+            set -eu
+            echo "Starting build perconna-server"
+            export build_dir=$(pwd -P)
+            cd ${build_dir}
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --rpm_release=${RPM_RELEASE} --deb_release=${DEB_RELEASE} --build_deb=1
             cp -r deb /artifacts/
             
