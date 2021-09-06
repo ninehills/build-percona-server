@@ -53,11 +53,13 @@ jobs:
           dockerRunArgs: |
             --volume "${PWD}/artifacts:/artifacts"
           install: |
+            export DEBIAN_FRONTEND="noninteractive"
             apt-get update && apt-get install -y wget dpkg-dev devscripts
             apt-get install -y bison cmake debhelper libaio-dev libmecab-dev libncurses5-dev po-debconf psmisc zlib1g-dev libreadline-dev libpam-dev libssl-dev libnuma-dev libwrap0-dev dh-systemd libcurl4-openssl-dev
           # Shell commands to execute in the container.
           run: |
             set -o xtrace
+            set -eu
             echo "Starting build perconna-server"
             rm -rf test || true
             mkdir test
@@ -67,7 +69,22 @@ jobs:
             sed -i 's/percona-release enable tools testing/#percona-release enable tools testing/g' percona-server_builder.sh
             export build_dir=$(pwd -P)
             cd ${build_dir}
-            bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --install_deps=1
+            export DEBIAN_FRONTEND="noninteractive"
+            apt-get -y install dirmngr || true
+            apt-get -y install lsb-release wget
+            apt-get -y purge eatmydata || true
+            apt-get -y install psmisc pkg-config libsasl2-modules libsasl2-modules-ldap libsasl2-dev
+            apt-get -y install dh-systemd curl bison cmake perl libssl-dev gcc g++ libaio-dev libldap2-dev libwrap0-dev gdb unzip gawk
+            apt-get -y install lsb-release libmecab-dev libncurses5-dev libreadline-dev libpam-dev zlib1g-dev
+            apt-get -y install libldap2-dev libnuma-dev libjemalloc-dev libeatmydata libc6-dbg valgrind libjson-perl python-mysqldb libsasl2-dev
+            apt-get -y install libmecab2 mecab mecab-ipadic
+            apt-get -y install build-essential devscripts libnuma-dev
+            apt-get -y install cmake autotools-dev autoconf automake build-essential devscripts debconf debhelper fakeroot 
+            apt-get -y install libcurl4-openssl-dev patchelf
+            export DIST="$(lsb_release -sc)"
+            if [ "x${DIST}" = "xcosmic" -o "x${DIST}" = "xbionic" -o "x${DIST}" = "xdisco" -o "x${DIST}" = "xbuster" -o "x${DIST}" = "xfocal" ]; then
+                apt-get -y install libeatmydata1
+            fi
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --rpm_release=${RPM_RELEASE} --deb_release=${DEB_RELEASE} --build_deb=1
             cp -r deb /artifacts/
       
