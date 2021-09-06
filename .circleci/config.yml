@@ -1,0 +1,52 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+jobs:
+  build-medium:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    environment:
+      MAJOR_VERSION: "5.7"
+      VERSION: "5.7.34-37"
+      BRANCH: "Percona-Server-5.7.34-37"
+      GIT_REPO: "https://github.com/percona/percona-server.git"
+    steps:
+      - run: 
+          name: install_packages
+          command: |
+            apt-get update && apt-get install -y wget
+            mkdir -p artifacts/source_deb && cd artifacts/source_deb
+            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.debian.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.dsc
+            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1_source.changes
+            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}.orig.tar.gz
+            export DEBIAN_FRONTEND="noninteractive"
+            apt-get update
+            apt-get -y install dirmngr || true
+            apt-get -y purge eatmydata || true
+            apt-get -y install autoconf automake autotools-dev bison build-essential cmake curl debconf debhelper devscripts dh-systemd dpkg-dev \
+              fakeroot g++ gawk gcc gdb libaio-dev libc6-dbg libcurl4-openssl-dev libeatmydata1 libjemalloc-dev libjson-perl libldap2-dev libmecab-dev \
+              libmecab2 libncurses5-dev libnuma-dev libpam-dev libreadline-dev libsasl2-dev libsasl2-modules libsasl2-modules-ldap libssl-dev libwrap0-dev \
+              lsb-release mecab mecab-ipadic patchelf perl pkg-config po-debconf psmisc unzip valgrind wget zlib1g-dev
+            cd ../../
+            set -o xtrace
+            set -eu
+            echo "Starting build perconna-server"
+            rm -rf test || true
+            mkdir test
+            cp -r artifacts/source_deb test/
+            wget https://raw.githubusercontent.com/percona/percona-server/${BRANCH}/build-ps/percona-server-5.7_builder.sh -O percona-server_builder.sh
+            sed -i 's:sudo::g' percona-server_builder.sh
+            export build_dir=$(pwd -P)
+            cd ${build_dir}
+            bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --deb_release=1 --build_deb=1
+            cp -r deb /artifacts/
+      - store_artifacts:
+          path: /artifacts/deb
+          destination: artifact-deb
+
+workflows:
+  build:
+    jobs:
+      - build-medium
