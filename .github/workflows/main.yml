@@ -32,6 +32,12 @@ jobs:
             GIT_REPO: "https://github.com/percona/percona-server.git"
             RPM_RELEASE: "1"
             DEB_RELEASE: "1"
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
           # Shell commands to execute in the container.
           run: |
             echo "Starting build perconna-server"
@@ -42,7 +48,19 @@ jobs:
             wget https://raw.githubusercontent.com/percona/percona-server/${BRANCH}/build-ps/percona-server-5.7_builder.sh -O percona-server_builder.sh
             sed -i 's:sudo::g' percona-server_builder.sh
             export build_dir=$(pwd -P)
-            set -o xtrace
+            mkdir -p source_deb
+            cd source_deb
+            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.34-37/source/debian/percona-server-5.7_5.7.34-37-1.debian.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.34-37/source/debian/percona-server-5.7_5.7.34-37-1.dsc
+            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.34-37/source/debian/percona-server-5.7_5.7.34-37-1_source.changes
+            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.34-37/source/debian/percona-server-5.7_5.7.34-37.orig.tar.gz
             cd ${build_dir}
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --install_deps=1
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --rpm_release=${RPM_RELEASE} --deb_release=${DEB_RELEASE} --build_deb=1
+            cp -r deb /artifacts/
+            
+      - name: Show the artifact
+        # Items placed in /artifacts in the container will be in
+        # ${PWD}/artifacts on the host.
+        run: |
+          ls -al "${PWD}/artifacts"
