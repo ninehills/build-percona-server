@@ -54,6 +54,7 @@ jobs:
           run: |
             echo "Starting build perconna-server"
             set -o xtrace
+            apt-get update && apt-get install -y wget
             rm -rf test || true
             mkdir test
             cp -r /artifacts/source_deb test/
