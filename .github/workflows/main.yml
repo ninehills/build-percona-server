@@ -54,10 +54,7 @@ jobs:
             --volume "${PWD}/artifacts:/artifacts"
           install: |
             apt-get update && apt-get install -y wget dpkg-dev devscripts
-            wget https://raw.githubusercontent.com/percona/percona-server/Percona-Server-5.7.34-37/build-ps/percona-server-5.7_builder.sh -O percona-server_builder.sh
-            sed -i 's:sudo::g' percona-server_builder.sh
-            apt-get install -y bison cmake debhelper libaio-dev libmecab-dev libncurses5-dev po-debconf psmisc zlib1g-dev libreadline-dev libpam-dev libssl-dev libnuma-dev libwrap0-dev dh-systemd
-            bash -x ./percona-server_builder.sh --install_deps=1
+            apt-get install -y bison cmake debhelper libaio-dev libmecab-dev libncurses5-dev po-debconf psmisc zlib1g-dev libreadline-dev libpam-dev libssl-dev libnuma-dev libwrap0-dev dh-systemd libcurl4-openssl-dev
           # Shell commands to execute in the container.
           run: |
             set -o xtrace
@@ -70,12 +67,12 @@ jobs:
             sed -i 's:sudo::g' percona-server_builder.sh
             export build_dir=$(pwd -P)
             cd ${build_dir}
+            bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --install_deps=1
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --rpm_release=${RPM_RELEASE} --deb_release=${DEB_RELEASE} --build_deb=1
             cp -r deb /artifacts/
   
       - name: Setup upterm session
-        uses: lhotari/action-upterm@v1    
-        if: ${{ steps.build-arm64.conclusion == 'failure' }}
+        uses: lhotari/action-upterm@v1
       
       - name: Show the artifact
         # Items placed in /artifacts in the container will be in
