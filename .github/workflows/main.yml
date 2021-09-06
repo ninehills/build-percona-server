@@ -13,9 +13,21 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
-
+    env:
+      MAJOR_VERSION: "5.7"
+      VERSION: "5.7.34-37"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Download deb source
+        run: |
+          apt-get update && apt-get install -y wget
+          mkdir -p artifacts/source_deb
+          cd artifacts/source_deb
+          wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.debian.tar.gz
+          wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.dsc
+          wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1_source.changes
+          wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}.orig.tar.gz
+          
       - name: Build in arm64
         # You may pin to the exact commit or the version.
         # uses: uraimo/run-on-arch-action@07a46afceb4aea01aaa545fedfff61ad9e4c7df0
@@ -28,8 +40,7 @@ jobs:
           # Your GitHub token, used for caching Docker images in your project's public package registry. Usually this would just be $\{{ github.token }}. This speeds up builds and is highly recommended.
           githubToken: ${{ github.token }}
           env: |
-            BRANCH: "Percona-Server-5.7.34-37"
-            VERSION: "5.7.34-37"
+            BRANCH: "Percona-Server-${{ env.VERSION }}"
             GIT_REPO: "https://github.com/percona/percona-server.git"
             RPM_RELEASE: "1"
             DEB_RELEASE: "1"
@@ -43,18 +54,12 @@ jobs:
           run: |
             echo "Starting build perconna-server"
             set -o xtrace
-            apt-get update && apt-get install -y wget
             rm -rf test || true
             mkdir test
+            cp -r /artifacts/source_deb test/
             wget https://raw.githubusercontent.com/percona/percona-server/${BRANCH}/build-ps/percona-server-5.7_builder.sh -O percona-server_builder.sh
             sed -i 's:sudo::g' percona-server_builder.sh
             export build_dir=$(pwd -P)
-            mkdir -p source_deb
-            cd source_deb
-            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${VERSION}/source/debian/percona-server-5.7_${VERSION}-1.debian.tar.gz
-            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${VERSION}/source/debian/percona-server-5.7_${VERSION}-1.dsc
-            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${VERSION}/source/debian/percona-server-5.7_${VERSION}-1_source.changes
-            wget https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${VERSION}/source/debian/percona-server-5.7_${VERSION}.orig.tar.gz
             cd ${build_dir}
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --install_deps=1
             bash -x ./percona-server_builder.sh --builddir=${build_dir}/test --repo=${GIT_REPO} --branch=${BRANCH} --rpm_release=${RPM_RELEASE} --deb_release=${DEB_RELEASE} --build_deb=1
