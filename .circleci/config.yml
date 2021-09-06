@@ -15,7 +15,7 @@ jobs:
       - run: 
           name: install_packages
           command: |
-            sudo apt-get update && apt-get install -y wget
+            sudo apt-get update && sudo apt-get install -y wget
             mkdir -p artifacts/source_deb && cd artifacts/source_deb
             wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.debian.tar.gz
             wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.dsc
