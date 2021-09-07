@@ -40,9 +40,9 @@ jobs:
             cp -r artifacts/source_deb test/
             wget https://raw.githubusercontent.com/percona/percona-server/${BRANCH}/build-ps/percona-server-5.7_builder.sh -O percona-server_builder.sh
             bash -x ./percona-server_builder.sh --builddir=$PWD/test --repo=${GIT_REPO} --branch=${BRANCH} --deb_release=1 --build_deb=1
-            cp -r deb /artifacts/
+            cp -r deb artifacts/
       - store_artifacts:
-          path: /artifacts/deb
+          path: artifacts/deb
           destination: artifact-deb
 
 workflows:
