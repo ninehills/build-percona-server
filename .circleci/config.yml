@@ -29,7 +29,9 @@ jobs:
               fakeroot g++ gawk gcc gdb libaio-dev libc6-dbg libcurl4-openssl-dev libeatmydata1 libjemalloc-dev libjson-perl libldap2-dev libmecab-dev \
               libmecab2 libncurses5-dev libnuma-dev libpam-dev libreadline-dev libsasl2-dev libsasl2-modules libsasl2-modules-ldap libssl-dev libwrap0-dev \
               lsb-release mecab mecab-ipadic patchelf perl pkg-config po-debconf psmisc unzip valgrind wget zlib1g-dev
-            cd ../../
+      - run:
+          name: build_deb
+          command: |
             set -o xtrace
             set -eu
             echo "Starting build perconna-server"
