@@ -2,7 +2,7 @@
 version: 2.1
 
 jobs:
-  build-medium:
+  build-57:
     machine:
       image: ubuntu-2004:202101-01
     resource_class: arm.medium
@@ -44,8 +44,52 @@ jobs:
       - store_artifacts:
           path: artifacts/deb
           destination: artifact-deb
-
+  build-80:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    environment:
+      MAJOR_VERSION: "8.0"
+      VERSION: "8.0.25-15"
+      BRANCH: "Percona-Server-8.0.25-15"
+      GIT_REPO: "https://github.com/percona/percona-server.git"
+    steps:
+      - run: 
+          name: install_packages
+          command: |
+            sudo apt-get update && sudo apt-get install -y wget
+            mkdir -p artifacts/source_deb && cd artifacts/source_deb
+            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.debian.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.dsc
+            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1_source.changes
+            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}.orig.tar.gz
+            export DEBIAN_FRONTEND="noninteractive"
+            sudo apt-get update
+            sudo apt-get -y install dirmngr || true
+            sudo apt-get -y purge eatmydata || true
+            sudo apt-get -y install autoconf automake autotools-dev bison build-essential cmake curl debconf debhelper devscripts dh-systemd dpkg-dev \
+              fakeroot g++ gawk gcc gdb libaio-dev libc6-dbg libcurl4-openssl-dev libeatmydata1 libjemalloc-dev libjson-perl libldap2-dev libmecab-dev \
+              libmecab2 libncurses5-dev libnuma-dev libpam-dev libreadline-dev libsasl2-dev libsasl2-modules libsasl2-modules-ldap libssl-dev libwrap0-dev \
+              lsb-release mecab mecab-ipadic patchelf perl pkg-config po-debconf psmisc unzip valgrind wget zlib1g-dev
+            sudo apt-get -y install dh-apparmor ccache libevent-dev libgsasl7 liblz4-dev libre2-dev libtool libzstd-dev libzbd-dev \
+              clang-12 pkg-config make libgflags-dev nvme-cli util-linux fio zbd-util
+      - run:
+          name: build_deb
+          command: |
+            set -o xtrace
+            set -eu
+            echo "Starting build perconna-server"
+            rm -rf test || true
+            mkdir test
+            cp -r artifacts/source_deb test/
+            wget https://raw.githubusercontent.com/percona/percona-server/${BRANCH}/build-ps/percona-server-8.0_builder.sh -O percona-server_builder.sh
+            bash -x ./percona-server_builder.sh --builddir=$PWD/test --repo=${GIT_REPO} --branch=${BRANCH} --deb_release=1 --build_deb=1
+            cp -r deb artifacts/
+      - store_artifacts:
+          path: artifacts/deb
+          destination: artifact-deb
 workflows:
   build:
     jobs:
-      - build-medium
+      - build-57
+      - build-80
