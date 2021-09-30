@@ -71,8 +71,8 @@ jobs:
               fakeroot g++ gawk gcc gdb libaio-dev libc6-dbg libcurl4-openssl-dev libeatmydata1 libjemalloc-dev libjson-perl libldap2-dev libmecab-dev \
               libmecab2 libncurses5-dev libnuma-dev libpam-dev libreadline-dev libsasl2-dev libsasl2-modules libsasl2-modules-ldap libssl-dev libwrap0-dev \
               lsb-release mecab mecab-ipadic patchelf perl pkg-config po-debconf psmisc unzip valgrind wget zlib1g-dev
-            sudo apt-get -y install dh-apparmor ccache libevent-dev libgsasl7 liblz4-dev libre2-dev libtool libzstd-dev libzbd-dev \
-              clang-12 pkg-config make libgflags-dev nvme-cli util-linux fio zbd-util
+            sudo apt-get -y install dh-apparmor ccache libevent-dev libgsasl7 liblz4-dev libre2-dev libtool libzstd-dev \
+              clang-12 pkg-config make libgflags-dev nvme-cli util-linux fio
       - run:
           name: build_deb
           command: |
