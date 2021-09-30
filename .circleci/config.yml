@@ -59,10 +59,10 @@ jobs:
           command: |
             sudo apt-get update && sudo apt-get install -y wget
             mkdir -p artifacts/source_deb && cd artifacts/source_deb
-            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.debian.tar.gz
-            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.dsc
-            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1_source.changes
-            wget https://downloads.percona.com/downloads/Percona-Server-${MAJOR_VERSION}/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}.orig.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-Server-LATEST/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.debian.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-Server-LATEST/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1.dsc
+            wget https://downloads.percona.com/downloads/Percona-Server-LATEST/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}-1_source.changes
+            wget https://downloads.percona.com/downloads/Percona-Server-LATEST/Percona-Server-${VERSION}/source/debian/percona-server-${MAJOR_VERSION}_${VERSION}.orig.tar.gz
             export DEBIAN_FRONTEND="noninteractive"
             sudo apt-get update
             sudo apt-get -y install dirmngr || true
