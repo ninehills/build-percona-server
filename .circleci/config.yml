@@ -60,7 +60,7 @@ jobs:
             sudo apt-get update && sudo apt-get install -y wget
             mkdir -p artifacts/source_deb && cd artifacts/source_deb
             wget https://downloads.percona.com/downloads/Percona-Server-LATEST/Percona-Server-${VERSION}/source/debian/percona-server_${VERSION}-1.debian.tar.xz
-            wget https://downloads.percona.com/downloads/Percona-Server-LATEST/Percona-Server-${VERSION}/source/debian/percona-server_${VERSION}-1.dsc
+            wget https://raw.githubusercontent.com/ninehills/build-percona-server/main/percona-server_${VERSION}-1.dsc
             wget https://downloads.percona.com/downloads/Percona-Server-LATEST/Percona-Server-${VERSION}/source/debian/percona-server_${VERSION}-1_source.changes
             wget https://downloads.percona.com/downloads/Percona-Server-LATEST/Percona-Server-${VERSION}/source/debian/percona-server_${VERSION}.orig.tar.gz
             export DEBIAN_FRONTEND="noninteractive"
