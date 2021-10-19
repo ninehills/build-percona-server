@@ -727,7 +727,7 @@ build_source_deb(){
     rm -f *.dsc *.orig.tar.gz *.debian.tar.gz *.changes
     #
 
-    TARFILE=$(basename $(find . -name 'percona-server-*.tar.gz' | grep -v tokudb | sort | tail -n1))
+    TARFILE=$(basename $(find . -name 'percona-server-*.tar.gz' | grep -v tokudb | grep -v rocksdb | sort | tail -n1))
 
     NAME=$(echo ${TARFILE}| awk -F '-' '{print $1"-"$2}')
     VERSION=$(echo ${TARFILE}| awk -F '-' '{print $3}')
