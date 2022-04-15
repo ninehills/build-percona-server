@@ -8,8 +8,8 @@ jobs:
     resource_class: arm.medium
     environment:
       MAJOR_VERSION: "5.7"
-      VERSION: "5.7.34-37"
-      BRANCH: "Percona-Server-5.7.34-37"
+      VERSION: "5.7.37-40"
+      BRANCH: "Percona-Server-5.7.37-40"
       GIT_REPO: "https://github.com/percona/percona-server.git"
     steps:
       - run: 
